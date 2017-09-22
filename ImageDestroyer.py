@@ -33,17 +33,13 @@ def seq_image():
         for y in range(w):
             yield pixels[y, x]
 
-#Code copied from another project to get valid neighbouring pixels
-def GetNeighbours(currentx, currenty, boardsizex, boardsizey):
-        neighbours = ((1, 1), (-1, 1), (1, -1), (-1, -1),
-                        (0, 1), (-1, 0), (1, 0), (0, -1))
-        TrueNeighbours = []
-        for neighbour in neighbours:
-            xref = neighbour[0] + currentx
-            yref = neighbour[1] + currenty
-            if (0 <= xref < boardsizex) and (0 <= yref < boardsizey):
-                TrueNeighbours.append((xref, yref))
-        return TrueNeighbours
+#Function for enabling the reuse of the output of another function
+def prepare_reiterate():
+    global pixels, final_image
+    tmp = Image.new('RGB', (w, h))
+    tmp.putdata(final_image)
+    pixels = tmp.load()
+    final_image = []
 
 def greyscale():
     global w, h, pixels, final_image
@@ -121,7 +117,9 @@ def scratches(thresh, prop_length):
                 propagation = random.randint(0, prop_length)
             final_image.append(pixel)
 
-scratches(0.1, 10)
+random_displacer(0.7)
+prepare_reiterate()
+edge_jumbler()
 
 outimage = Image.new('RGB', (w, h))
 outimage.putdata(final_image)
