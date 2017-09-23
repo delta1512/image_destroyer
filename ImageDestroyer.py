@@ -17,6 +17,8 @@ else:
 w, h = image.size[0], image.size[1]
 pixels = image.load()
 final_image = []
+neighbours = ((1, 1), (-1, 1), (1, -1), (-1, -1),
+                (0, 1), (-1, 0), (1, 0), (0, -1))
 
 #Demonstration of performing an average
 def average(pixel):
@@ -86,9 +88,7 @@ def random_brightness():
             final_image.append(tuple(pixel))
 
 def random_displacer(thresh):
-    global w, h, pixels, final_image
-    neighbours = ((1, 1), (-1, 1), (1, -1), (-1, -1),
-                    (0, 1), (-1, 0), (1, 0), (0, -1))
+    global w, h, pixels, final_image, neighbours
     for x in range(h):
         for y in range(w):
             pixel = pixels[y, x]
@@ -117,9 +117,33 @@ def scratches(thresh, prop_length):
                 propagation = random.randint(0, prop_length)
             final_image.append(pixel)
 
-random_displacer(0.7)
-prepare_reiterate()
-edge_jumbler()
+def worms(amount, minP, thresh):
+    global w, h, pixels, final_image, neighbours
+    for spawn in range(amount):
+        y, x = random.randint(0, w-1), random.randint(0, h-1)
+        init = minP
+        original = pixels[y, x]
+        cutneighbours = neighbours[4:]
+        choice = random.randint(1, 4)
+        if choice == 1:
+            chosen_neighbours = cutneighbours[0:3]
+        elif choice == 2:
+            chosen_neighbours = cutneighbours[1:4]
+        elif choice == 3:
+            chosen_neighbours = [cutneighbours[0], cutneighbours[2], cutneighbours[3]]
+        else:
+            chosen_neighbours = [cutneighbours[0], cutneighbours[1], cutneighbours[3]]
+        while (random.uniform(0, 1) < thresh) or (init > 0):
+            newy, newx = -1, -1
+            while not ((0 <= newy < w) and (0 <= newx < h)):
+                nextpix = chosen_neighbours[random.randint(0, 2)]
+                newy, newx = y + nextpix[0], x + nextpix[1]
+            y, x = newy, newx
+            pixels[y, x] = original
+            init -= 1
+    for x in range(h):
+        for y in range(w):
+            final_image.append(pixels[y, x])
 
 outimage = Image.new('RGB', (w, h))
 outimage.putdata(final_image)
