@@ -145,6 +145,25 @@ def worms(amount, minP, thresh):
         for y in range(w):
             final_image.append(pixels[y, x])
 
+def compress(thresh):
+    global w, h, pixels, final_image
+    final_image = list(seq_image())
+    start, stop = 0, 0
+    avgstart = average(final_image[0])
+    avglist = []
+    for i, pixel in enumerate(seq_image()):
+        pixavg = average(pixel)
+        if ((-thresh * avgstart) <= pixavg <= (thresh * avgstart)) or len(avglist) < 1:
+            avglist.append(pixavg)
+            stop = i
+        else:
+            colour = average(avglist)
+            for i in range(start, stop):
+                final_image[i] = (colour, colour, colour)
+            start = stop + 1
+            avglist = []
+            avgstart = average(final_image[start])
+
 outimage = Image.new('RGB', (w, h))
 outimage.putdata(final_image)
 outimage.save('/home/mark/prog/outimage.png')
